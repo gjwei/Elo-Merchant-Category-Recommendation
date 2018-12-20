@@ -18,6 +18,7 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 pd.set_option('display.max_columns', 500)
 import glob
 from feature_gen.utils import read_data
+import gc
 
 
 param = {'num_leaves': 111,
@@ -39,11 +40,25 @@ folds = KFold(n_splits=5, shuffle=True, random_state=15)
 
 train = read_data('./input/train.csv')
 test = read_data('./input/test.csv')
+print(train.head())
+target = train['target']
 
-for file_path in glob.glob("./input/features/", "*.csv"):
-    feature_df -
+del train['target']
+gc.collect()
 
+for file_path in glob.glob("./input/features/*.csv"):
+    print('merge feature {}'.format(file_path))
+    feature_df = pd.read_csv(file_path)
+    train = pd.merge(train, feature_df, on='card_id', how='left')
+    test = pd.merge(test, feature_df, on='card_id', how='left')
 
+    del feature_df
+    gc.collect()
+
+features = [c for c in train.columns if c not in ['card_id', 'first_active_month']]
+categorical_feats = ['feature_2', 'feature_3']
+
+# print(train.head())
 
 oof = np.zeros(len(train))
 predictions = np.zeros(len(test))
@@ -80,3 +95,25 @@ for fold_, (trn_idx, val_idx) in enumerate(folds.split(train.values, target.valu
     predictions += clf.predict(test[features], num_iteration=clf.best_iteration) / folds.n_splits
 
 print("CV score: {:<8.5f}".format(mean_squared_error(oof, target) ** 0.5))
+
+cols = (feature_importance_df[["Feature", "importance"]]
+        .groupby("Feature")
+        .mean()
+        .sort_values(by="importance", ascending=False)[:1000].index)
+
+best_features = feature_importance_df.loc[feature_importance_df.Feature.isin(cols)]
+
+plt.figure(figsize=(14,25))
+sns.barplot(x="importance",
+            y="Feature",
+            data=best_features.sort_values(by="importance",
+                                           ascending=False))
+plt.title('LightGBM Features (avg over folds)')
+plt.tight_layout()
+plt.savefig('./run/lightgbm_experiments/lgbm_importances.png')
+
+sub_df = pd.DataFrame({"card_id": test["card_id"].values})
+sub_df["target"] = predictions
+
+now = datetime.datetime.strftime(datetime.datetime.now(), '%b-%d-%y %H:%M')
+sub_df.to_csv("results/submission_{}.csv".format(now), index=False)
