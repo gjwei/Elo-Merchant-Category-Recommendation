@@ -52,6 +52,11 @@ print('binarize feature Y and N')
 historical_transactions = binarize(historical_transactions)
 new_transactions = binarize(new_transactions)
 
+for df in [historical_transactions, new_transactions]:
+    df['category_2'].fillna(1.0, inplace=True)
+    df['category_3'].fillna('A', inplace=True)
+    df['merchant_id'].fillna('M_ID_00a6ca8a8a', inplace=True)
+
 print('gen feature month_diff')
 historical_transactions['month_diff'] = ((datetime.datetime.today() - historical_transactions[
     'purchase_date']).dt.days) // 30
