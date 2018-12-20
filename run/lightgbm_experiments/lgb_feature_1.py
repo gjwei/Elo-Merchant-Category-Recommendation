@@ -6,7 +6,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 import lightgbm as lgb
-from sklearn.model_selection import KFold
+from sklearn.model_selection import KFold, StratifiedKFold
 import warnings
 import time
 import sys
@@ -36,12 +36,16 @@ param = {'num_leaves': 111,
          "random_state": 133,
          "verbosity": -1}
 
-folds = KFold(n_splits=5, shuffle=True, random_state=15)
+folds = StratifiedKFold(n_splits=5, shuffle=True, random_state=15)
 
 train = read_data('./input/train.csv')
 test = read_data('./input/test.csv')
-print(train.head())
+# print(train.head())
 target = train['target']
+
+train['outlier'] = 0
+train.loc[train['target'] < -30, 'outlier'] = 1
+print(train['outlier'].value_counts())
 
 del train['target']
 gc.collect()
@@ -55,7 +59,7 @@ for file_path in glob.glob("./input/features/*.csv"):
     del feature_df
     gc.collect()
 
-features = [c for c in train.columns if c not in ['card_id', 'first_active_month']]
+features = [c for c in train.columns if c not in ['card_id', 'first_active_month', 'outliers']]
 categorical_feats = ['feature_2', 'feature_3']
 
 # print(train.head())
@@ -65,8 +69,8 @@ predictions = np.zeros(len(test))
 start = time.time()
 feature_importance_df = pd.DataFrame()
 
-for fold_, (trn_idx, val_idx) in enumerate(folds.split(train.values, target.values)):
-    print("fold n°{}".format(fold_))
+for fold_, (trn_idx, val_idx) in enumerate(folds.split(train, train['outliers'].values)):
+    print("fold n / {}".format(fold_))
     trn_data = lgb.Dataset(train.iloc[trn_idx][features],
                            label=target.iloc[trn_idx],
                            categorical_feature=categorical_feats

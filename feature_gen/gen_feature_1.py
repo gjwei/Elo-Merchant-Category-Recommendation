@@ -92,15 +92,15 @@ def aggregate_transactions(history):
                                           astype(np.int64) * 1e-9
 
     agg_func = {
-        'category_1': ['sum', 'mean'],
-        'category_2_1.0': ['mean'],
-        'category_2_2.0': ['mean'],
-        'category_2_3.0': ['mean'],
-        'category_2_4.0': ['mean'],
-        'category_2_5.0': ['mean'],
-        'category_3_A': ['mean'],
-        'category_3_B': ['mean'],
-        'category_3_C': ['mean'],
+        'category_1': ['sum', 'mean', 'std'],
+        'category_2_1.0': ['mean', 'std'],
+        'category_2_2.0': ['mean', 'std'],
+        'category_2_3.0': ['mean', 'std'],
+        'category_2_4.0': ['mean', 'std'],
+        'category_2_5.0': ['mean', 'std'],
+        'category_3_A': ['mean', 'std'],
+        'category_3_B': ['mean', 'std'],
+        'category_3_C': ['mean', 'std'],
         'merchant_id': ['nunique'],
         'merchant_category_id': ['nunique'],
         'state_id': ['nunique'],
@@ -111,7 +111,7 @@ def aggregate_transactions(history):
         'purchase_month': ['mean', 'max', 'min', 'std'],
         'purchase_date': [np.ptp, 'min', 'max'],
         'month_lag': ['mean', 'max', 'min', 'std'],
-        'month_diff': ['mean']
+        'month_diff': ['mean', 'std']
     }
 
     agg_history = history.groupby(['card_id']).agg(agg_func)
