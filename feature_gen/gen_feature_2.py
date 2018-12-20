@@ -118,15 +118,15 @@ df_hist_trans_group = df_new_merchant_trans.groupby('card_id').agg(aggs)
 df_hist_trans_group.columns = new_columns
 df_hist_trans_group.reset_index(drop=False, inplace=True)
 df_hist_trans_group['new_hist_purchase_date_diff'] = (
-            df_hist_trans_group['new_hist_purchase_date_max'] - df_hist_trans_group[
-        'new_hist_purchase_date_min']).dt.days
+            df_hist_trans_group['new_hist_purchase_date_max'] - df_hist_trans_group['new_hist_purchase_date_min']).dt.days
+
 df_hist_trans_group['new_hist_purchase_date_average'] = df_hist_trans_group['new_hist_purchase_date_diff'] / \
                                                         df_hist_trans_group['new_hist_card_id_size']
 df_hist_trans_group['new_hist_purchase_date_uptonow'] = (
             datetime.datetime.today() - df_hist_trans_group['new_hist_purchase_date_max']).dt.days
 df_train = df_train.merge(df_hist_trans_group, on='card_id', how='left')
 df_test = df_test.merge(df_hist_trans_group, on='card_id', how='left')
-del df_hist_trans_group;
+del df_hist_trans_group
 gc.collect()
 
 del df_hist_trans

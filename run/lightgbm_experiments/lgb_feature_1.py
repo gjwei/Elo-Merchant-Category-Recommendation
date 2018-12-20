@@ -43,9 +43,9 @@ test = read_data('./input/test.csv')
 # print(train.head())
 target = train['target']
 
-train['outlier'] = 0
-train.loc[train['target'] < -30, 'outlier'] = 1
-print(train['outlier'].value_counts())
+train['outliers'] = 0
+train.loc[train['target'] < -30, 'outliers'] = 1
+print(train['outliers'].value_counts())
 
 del train['target']
 gc.collect()
