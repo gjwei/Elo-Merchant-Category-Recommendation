@@ -4,6 +4,7 @@
 import numpy as np
 import pandas as pd
 import datetime
+import os
 
 
 def binarize(df):
@@ -172,11 +173,12 @@ additional_fields = additional_fields.merge(successive_aggregates(new_transactio
                                             on='card_id', how='left')
 
 # save to file
-save_path = '../input/features/'
+save_path = './input/features/'
+os.makedirs(save_path, exist_ok=True)
 
 history.to_csv('{}history.csv'.format(save_path), index=False)
 authorized.to_csv("{}authorized.csv".format(save_path), index=False)
 new.to_csv('{}new.csv'.format(save_path), index=False)
 final_group.to_csv('{}final_group.csv'.format(save_path), index=False)
 auth_mean.to_csv("{}auth_mean.csv".format(save_path), index=False)
-additional_fields.to_csv('{}addtional_fields.csv'.format(save_path), index=False)
+additional_fields.to_csv('{}additional_fields.csv'.format(save_path), index=False)
